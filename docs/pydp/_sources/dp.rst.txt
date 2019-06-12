@@ -1,0 +1,58 @@
+dp package
+==========
+
+Subpackages
+-----------
+
+
+Submodules
+----------
+
+dp.audio module
+---------------
+
+.. automodule:: dp.audio
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dp.da module
+------------
+
+.. automodule:: dp.da
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dp.resnet module
+----------------
+
+.. automodule:: dp.resnet
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dp.utils module
+---------------
+
+.. automodule:: dp.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dp.vgg module
+-------------
+
+.. automodule:: dp.vgg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: dp
+    :members:
+    :undoc-members:
+    :show-inheritance:

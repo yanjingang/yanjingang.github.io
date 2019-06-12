@@ -1,0 +1,511 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dp.da &mdash; pydp 0.0.19 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'0.0.19',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pydp
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pydp</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>dp.da</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dp.da</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File: da.py</span>
+<span class="sd">Desc: 需求识别基类</span>
+<span class="sd">Author:yanjingang(yanjingang@mail.com)</span>
+<span class="sd">Date: 2019/2/21 23:34</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">jieba</span>
+<span class="kn">from</span> <span class="nn">dp</span> <span class="k">import</span> <span class="n">utils</span>
+
+<span class="n">CUR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../dp.html#dp.da.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;解析模版/词库树&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">isleaf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">childs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>     <span class="c1"># 名称</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>    <span class="c1"># id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deep</span> <span class="o">=</span> <span class="n">deep</span>      <span class="c1"># 节点深度类型（0root，1意图分类，2解析模版分类，3+模版树或词库树节点）</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>  <span class="c1"># 节点计数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isleaf</span> <span class="o">=</span> <span class="n">isleaf</span>  <span class="c1"># 是否可作为叶子节点</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="n">param</span>   <span class="c1"># 参数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">childs</span> <span class="o">=</span> <span class="n">childs</span> <span class="k">if</span> <span class="n">childs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>      <span class="c1"># 子节点</span>
+
+<div class="viewcode-block" id="Node.add_count"><a class="viewcode-back" href="../../dp.html#dp.da.Node.add_count">[docs]</a>    <span class="k">def</span> <span class="nf">add_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;增加节点计数&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="n">count</span></div>
+
+<div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../dp.html#dp.da.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;增加子节点&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">add_count</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">deep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deep</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="c1"># node.print()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="c1"># self.print()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Node.get_child"><a class="viewcode-back" href="../../dp.html#dp.da.Node.get_child">[docs]</a>    <span class="k">def</span> <span class="nf">get_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;获取子节点&quot;&quot;&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Node.get_child_names"><a class="viewcode-back" href="../../dp.html#dp.da.Node.get_child_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_child_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;获取所有一级子节点的name列表&quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">names</span></div>
+
+<div class="viewcode-block" id="Node.add_trie_child"><a class="viewcode-back" href="../../dp.html#dp.da.Node.add_trie_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_trie_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_node</span><span class="p">,</span> <span class="n">trieid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;增加单字字典树trietree&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_node</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span>
+            <span class="n">isleaf</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">_node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 是否是叶子</span>
+            <span class="c1">#print(_node.name[i:i+1], isleaf)</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">_node</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">_node</span><span class="o">.</span><span class="n">param</span><span class="p">,</span> <span class="n">isleaf</span><span class="o">=</span><span class="n">isleaf</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+
+<div class="viewcode-block" id="Node.find_trietree"><a class="viewcode-back" href="../../dp.html#dp.da.Node.find_trietree">[docs]</a>    <span class="k">def</span> <span class="nf">find_trietree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;从trietree中查找完全匹配字符串的叶子节点位置&quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 是否在query中匹配到这个dname</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)):</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1">#print(&quot;{},{}&quot;.format(i, word))</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_child</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># 没找到</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">isleaf</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;pos&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;substr&#39;</span><span class="p">:</span> <span class="n">words</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Node.get_trie_child_names"><a class="viewcode-back" href="../../dp.html#dp.da.Node.get_trie_child_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_trie_child_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;获取trietree递归子节点的name列表&quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">get_trie_child_names</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">names</span></div>
+
+<div class="viewcode-block" id="Node.print"><a class="viewcode-back" href="../../dp.html#dp.da.Node.print">[docs]</a>    <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;打印树&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deep</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isleaf</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param</span><span class="p">))</span>
+        <span class="n">prefix</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">childs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">deep</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">+</span>
+                      <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">childs</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">isleaf</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">param</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="Da"><a class="viewcode-back" href="../../dp.html#dp.da.Da">[docs]</a><span class="k">class</span> <span class="nc">Da</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;需求识别&quot;&quot;&quot;</span>
+    <span class="n">DICT_PATH</span> <span class="o">=</span> <span class="n">CUR_PATH</span> <span class="o">+</span> <span class="s2">&quot;/data/da/&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;初始化词典&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dict_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DICT_PATH</span> <span class="o">=</span> <span class="n">dict_path</span>
+        <span class="c1"># 加载意图词典</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_trigger_dict</span><span class="p">()</span>
+        <span class="c1"># 加载pattern词典</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_parser_dict</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Da.load_trigger_dict"><a class="viewcode-back" href="../../dp.html#dp.da.Da.load_trigger_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_trigger_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;加载意图词典&quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;__load_trigger_dict__&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DICT_PATH</span> <span class="o">+</span> <span class="s1">&#39;/trigger/&#39;</span><span class="p">,</span> <span class="s1">&#39;*.dict&#39;</span><span class="p">)):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">category</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="n">category</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span>
+            <span class="c1"># read file</span>
+            <span class="n">fo</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fo</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">[</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">category</span><span class="p">]</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">fo</span><span class="p">:</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;load_trigger_dict: [&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Da.get_trigger"><a class="viewcode-back" href="../../dp.html#dp.da.Da.get_trigger">[docs]</a>    <span class="k">def</span> <span class="nf">get_trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;意图分类识别&quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;__get_trigger__</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">full2half</span><span class="p">(</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">categorys</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 意图id</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">cut_all</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;word&#39;</span><span class="p">:</span> <span class="n">word</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">:</span>  <span class="c1"># 在意图字典中</span>
+                <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_dict</span><span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]]:</span>  <span class="c1"># 遍历意图id</span>
+                    <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categorys</span><span class="p">:</span>  <span class="c1"># 此意图Id已从之前的word获得</span>
+                        <span class="k">if</span> <span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">categorys</span><span class="p">[</span><span class="n">category</span><span class="p">]:</span>
+                            <span class="n">categorys</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">word</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">categorys</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">word</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">categorys</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">[</span><span class="s1">&#39;word&#39;</span><span class="p">]:</span> <span class="n">word</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]}</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">categorys</span><span class="p">)</span>
+
+        <span class="n">triggers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categorys</span><span class="p">:</span>
+            <span class="n">triggers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">:</span> <span class="n">categorys</span><span class="p">[</span><span class="n">category</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">triggers</span></div>
+
+<div class="viewcode-block" id="Da.load_parser_dict"><a class="viewcode-back" href="../../dp.html#dp.da.Da.load_parser_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_parser_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;加载需求匹配词典&quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;__load_parser_dict__&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser_tree</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">)</span>
+        <span class="c1"># 加载pattern和term</span>
+        <span class="n">parser_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DICT_PATH</span> <span class="o">+</span> <span class="s1">&#39;/parser/&#39;</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">__</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">parser_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;term&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">category_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_tree</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">category</span><span class="p">))</span>
+                <span class="c1"># pattern</span>
+                <span class="n">pattern_node</span> <span class="o">=</span> <span class="n">category_node</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pattern&#39;</span><span class="p">))</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">parser_path</span> <span class="o">+</span> <span class="n">category</span> <span class="o">+</span> <span class="s1">&#39;/pattern.dict&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+                    <span class="n">_pattern_node</span> <span class="o">=</span> <span class="n">pattern_node</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;][&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)):</span>
+                        <span class="n">isleaf</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="c1"># print(line)</span>
+                        <span class="n">_pattern_node</span> <span class="o">=</span> <span class="n">_pattern_node</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">isleaf</span><span class="o">=</span><span class="n">isleaf</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">line</span><span class="p">))</span>
+                        <span class="c1"># _pattern_node.print()</span>
+
+                <span class="c1"># term</span>
+                <span class="n">term_node</span> <span class="o">=</span> <span class="n">category_node</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;term&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">__</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">parser_path</span> <span class="o">+</span> <span class="n">category</span> <span class="o">+</span> <span class="s1">&#39;/term/&#39;</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">tfile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">tfile</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;.dict&#39;</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">term</span> <span class="o">=</span> <span class="n">tfile</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span>
+                        <span class="n">_term_node</span> <span class="o">=</span> <span class="n">term_node</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">term</span><span class="p">))</span>
+                        <span class="c1"># read dict</span>
+                        <span class="n">fo</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">fo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">parser_path</span> <span class="o">+</span> <span class="n">category</span> <span class="o">+</span> <span class="s1">&#39;/term/&#39;</span> <span class="o">+</span> <span class="n">tfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">fo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fo</span><span class="p">:</span>
+                                <span class="n">line</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">full2half</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                    <span class="n">_param</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                                    <span class="n">_term_node</span><span class="o">.</span><span class="n">add_trie_child</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="n">_param</span><span class="p">))</span>
+                        <span class="k">finally</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">fo</span><span class="p">:</span>
+                                <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+                <span class="c1"># break</span>
+
+        <span class="c1"># self.parser_tree.print()</span>
+
+<div class="viewcode-block" id="Da.get_parser"><a class="viewcode-back" href="../../dp.html#dp.da.Da.get_parser">[docs]</a>    <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;解析某trigger下的query&quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;__get_parser__</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">query</span><span class="p">))</span>
+        <span class="n">parsers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># query处理</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">full2half</span><span class="p">(</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="c1"># 意图parser配置/词典树</span>
+        <span class="n">parser_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_tree</span><span class="o">.</span><span class="n">get_child</span><span class="p">(</span><span class="n">trigger</span><span class="p">)</span>
+        <span class="c1"># parser_tree.print()</span>
+
+        <span class="c1"># 解析query</span>
+        <span class="n">_res</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser_query</span><span class="p">(</span><span class="n">parser_tree</span><span class="o">.</span><span class="n">get_child</span><span class="p">(</span><span class="s1">&#39;pattern&#39;</span><span class="p">),</span> <span class="n">parser_tree</span><span class="o">.</span><span class="n">get_child</span><span class="p">(</span><span class="s1">&#39;term&#39;</span><span class="p">),</span> <span class="n">query</span><span class="p">,</span> <span class="n">_res</span><span class="p">)</span>
+        <span class="c1"># print(_res)</span>
+        <span class="c1"># res_tree.print()</span>
+        <span class="c1"># 解析结果格式化</span>
+        <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">_res</span><span class="p">:</span>
+            <span class="n">pattern_list</span> <span class="o">=</span> <span class="n">pname</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;][&#39;</span><span class="p">)</span>
+            <span class="n">dict_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern_list</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_res</span><span class="p">[</span><span class="n">pname</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">dict_count</span><span class="p">:</span>  <span class="c1"># 未完全匹配模版的跳过</span>
+                <span class="k">continue</span>
+            <span class="c1">#print(pname, _res[pname])</span>
+            <span class="c1"># 格式化res</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_count</span><span class="p">):</span>
+                <span class="n">dname</span> <span class="o">=</span> <span class="n">pattern_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">substr</span> <span class="o">=</span> <span class="n">_res</span><span class="p">[</span><span class="n">pname</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;substr&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_res</span><span class="p">[</span><span class="n">pname</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># 多选1时，使用后缀比较选择能匹配上的那个</span>
+                    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">_res</span><span class="p">[</span><span class="n">pname</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">_q</span> <span class="o">=</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;substr&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span>
+                        <span class="k">if</span> <span class="n">_q</span> <span class="o">==</span> <span class="n">query</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_q</span><span class="p">)</span><span class="o">*-</span><span class="mi">1</span><span class="p">:]:</span>
+                            <span class="n">substr</span> <span class="o">=</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;substr&#39;</span><span class="p">]</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">substr</span> <span class="o">+</span> <span class="n">q</span>
+                <span class="c1"># print(q)</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dname</span><span class="p">,</span> <span class="n">substr</span><span class="p">))</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="n">parsers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;pattern&#39;</span><span class="p">:</span> <span class="n">pname</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">:</span> <span class="n">res</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">parsers</span></div>
+
+<div class="viewcode-block" id="Da.parser_query"><a class="viewcode-back" href="../../dp.html#dp.da.Da.parser_query">[docs]</a>    <span class="k">def</span> <span class="nf">parser_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern_tree</span><span class="p">,</span> <span class="n">term_tree</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">parent_res</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;根据解析模版树和词库树解析query&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">pattern_tree</span><span class="o">.</span><span class="n">childs</span><span class="p">:</span>
+            <span class="n">ptree</span> <span class="o">=</span> <span class="n">pattern_tree</span><span class="o">.</span><span class="n">childs</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>  <span class="c1"># 子树</span>
+            <span class="n">pid</span> <span class="o">=</span> <span class="n">ptree</span><span class="o">.</span><span class="n">param</span>
+            <span class="k">if</span> <span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent_res</span><span class="p">:</span>  <span class="c1"># 按模版id分组</span>
+                <span class="n">parent_res</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">term_tree</span><span class="o">.</span><span class="n">get_child</span><span class="p">(</span><span class="n">ptree</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">find_trietree</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>  <span class="c1"># 用query匹配dname对应的term词典</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="s2">[</span><span class="si">{}</span><span class="s2">] </span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">ptree</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ptree</span><span class="o">.</span><span class="n">isleaf</span><span class="p">,</span> <span class="n">res</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptree</span><span class="o">.</span><span class="n">childs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># 继续沿树往下找</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parser_query</span><span class="p">(</span><span class="n">ptree</span><span class="p">,</span> <span class="n">term_tree</span><span class="p">,</span> <span class="n">query</span><span class="p">[</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]:],</span> <span class="n">parent_res</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">parent_res</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;test&quot;&quot;&quot;</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">init_logging</span><span class="p">(</span><span class="n">log_file</span><span class="o">=</span><span class="s1">&#39;da&#39;</span><span class="p">,</span> <span class="n">log_path</span><span class="o">=</span><span class="n">CUR_PATH</span><span class="p">)</span>
+
+    <span class="n">da</span> <span class="o">=</span> <span class="n">Da</span><span class="p">(</span><span class="n">dict_path</span><span class="o">=</span><span class="n">CUR_PATH</span> <span class="o">+</span> <span class="s2">&quot;/data/da/&quot;</span><span class="p">)</span>
+    <span class="c1"># 意图分类</span>
+    <span class="c1">#res = da.get_trigger(&quot;宝马3系报价&quot;)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">get_trigger</span><span class="p">(</span><span class="s2">&quot;哪个恐龙跑的最快？&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;trigger: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+    <span class="c1"># 意图分类下的query解析</span>
+    <span class="c1">#res = da.get_parser(res[0][&#39;type&#39;], &quot;宝马3系报价&quot;)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">get_parser</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="s2">&quot;哪个恐龙跑的最快？&quot;</span><span class="p">)</span>
+    <span class="c1">#res = da.get_parser(res[0][&#39;type&#39;], &quot;跑的最快的恐龙&quot;)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;parser: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # tree test</span>
+<span class="sd">    tree = Node(name=&#39;root&#39;)</span>
+<span class="sd">    ctree = tree.add_child(Node(&#39;car&#39;))</span>
+<span class="sd">    # tree.print()</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;一汽&#39;))</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;一起&#39;))</span>
+<span class="sd">    # ctree.print()</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;一汽大众&#39;, param=&#39;aaa&#39;))</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;一汽奥迪&#39;))</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;上汽&#39;))</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;上汽通用&#39;))</span>
+<span class="sd">    ctree.add_trie_child(Node(&#39;上汽通用五菱&#39;))</span>
+<span class="sd">    ctree.print()</span>
+
+<span class="sd">    # trietree查找</span>
+<span class="sd">    res = ctree.find_trietree(&#39;一汽大众迈腾&#39;)</span>
+<span class="sd">    print(res)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, yanjingang
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
